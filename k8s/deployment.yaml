@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gshock-watch-app
+  labels:
+    app: gshock-watch-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gshock-watch-app
+  template:
+    metadata:
+      labels:
+        app: gshock-watch-app
+    spec:
+      containers:
+      - name: gshock-watch-app
+        # Replace with your image registry link or let OpenShift BuildConfig handle it
+        image: image-registry.openshift-image-registry.svc:5000/my-namespace/gshock-watch-app:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+          name: http
+        resources:
+          limits:
+            cpu: 200m
+            memory: 256Mi
+          requests:
+            cpu: 50m
+            memory: 64Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: false
+          runAsNonRoot: true
