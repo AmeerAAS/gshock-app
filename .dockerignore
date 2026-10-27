@@ -1,7 +1,0 @@
-.git
-.gitignore
-README.md
-k8s/
-openshift/
-*.md
-.DS_Store

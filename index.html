@@ -1,89 +1,793 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>G-SHOCK Skeleton Mechanical Hybrid</title>
-    <style>
-        :root {
-            --bg-color: #0b0d12;
-            --bezel-color: #1a1d24;
-            --bezel-accent: #2c313d;
-            --text-gold: #e5b94c;
-            --text-red: #ff3b30;
-            --lcd-bg: #8ba888;
-            --lcd-text: #142115;
-            --glass-shine: rgba(255, 255, 255, 0.05);
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>G-SHOCK Hybrid Skeleton - OpenShift Ready</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'gshock-dark': '#121316',
+            'gshock-bezel': '#1c1e22',
+            'gshock-accent': '#d9381e',
+            'gshock-yellow': '#f5b041',
+            'lcd-bg': '#1e2820',
+            'lcd-glow': '#00ffcc',
+            'lcd-text': '#112211',
+            'lcd-lit-text': '#00f0aa',
+          },
+          fontFamily: {
+            mono: ['Courier New', 'Courier', 'monospace'],
+            sans: ['Inter', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@500;700;900&display=swap');
+
+    .font-lcd {
+      font-family: 'Share Tech Mono', monospace;
+    }
+    .font-brand {
+      font-family: 'Orbitron', sans-serif;
+      letter-spacing: 0.15em;
+    }
+
+    /* Bezel styling */
+    .bezel-texture {
+      background: radial-gradient(circle at 30% 30%, #2a2e35 0%, #17181c 70%, #0d0e10 100%);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.8), inset 0 2px 4px rgba(255,255,255,0.1), inset 0 -4px 8px rgba(0,0,0,0.9);
+    }
+
+    .dial-inner {
+      background: radial-gradient(circle, rgba(15,18,22,0.4) 0%, rgba(5,6,8,0.85) 100%);
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.9);
+    }
+
+    /* Custom backlight glow */
+    .lcd-screen {
+      transition: all 0.25s ease-in-out;
+      background-color: #7b8e7d;
+      box-shadow: inset 0 2px 6px rgba(0,0,0,0.6);
+    }
+    
+    .lcd-screen.illuminated {
+      background-color: #053b36 !important;
+      box-shadow: 0 0 25px rgba(0, 255, 204, 0.8), inset 0 0 15px rgba(0, 255, 204, 0.9) !important;
+    }
+
+    .lcd-screen.illuminated .lcd-digit {
+      color: #00ffcc !important;
+      text-shadow: 0 0 8px rgba(0, 255, 204, 0.9), 0 0 15px rgba(0, 255, 204, 0.5) !important;
+    }
+
+    .lcd-digit {
+      color: #1a261c;
+      transition: color 0.2s ease;
+    }
+
+    /* Tab Switcher */
+    .tab-btn.active {
+      border-bottom: 3px solid #d9381e;
+      color: #ffffff;
+      background-color: rgba(255,255,255,0.05);
+    }
+
+    /* Code block container */
+    pre {
+      background-color: #0d1117;
+      color: #c9d1d9;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col justify-between overflow-x-hidden selection:bg-red-600 selection:text-white">
+
+  <!-- Top Navigation Header -->
+  <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-4">
+      <div class="flex items-center space-x-3">
+        <div class="bg-red-600 text-white font-black px-2 py-1 rounded text-xs tracking-widest font-brand">G-SHOCK</div>
+        <h1 class="text-lg font-bold tracking-wide text-slate-200">HYBRID SKELETON <span class="text-xs text-slate-500 font-mono">v1.0 (OpenShift-Ready)</span></h1>
+      </div>
+      <div class="flex space-x-1 bg-slate-950 p-1 rounded-lg border border-slate-800">
+        <button id="tab-watch" onclick="switchTab('watch')" class="tab-btn active px-4 py-1.5 rounded text-sm font-medium transition text-slate-400 hover:text-white flex items-center gap-2">
+          <i class="fa-solid fa-clock"></i> Interactive Watch
+        </button>
+        <button id="tab-openshift" onclick="switchTab('openshift')" class="tab-btn px-4 py-1.5 rounded text-sm font-medium transition text-slate-400 hover:text-white flex items-center gap-2">
+          <i class="fa-solid fa-server"></i> OpenShift Deploy Specs
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="flex-grow flex items-center justify-center p-4 md:p-8">
+    
+    <!-- VIEW 1: WATCH VIEW -->
+    <div id="view-watch" class="w-full max-w-4xl flex flex-col items-center">
+      
+      <!-- Watch Case Outer Shell -->
+      <div class="relative w-[340px] sm:w-[440px] h-[340px] sm:h-[440px] rounded-full bezel-texture border-4 border-slate-700/50 flex items-center justify-center p-6 sm:p-8 select-none">
+        
+        <!-- Screws on Bezel -->
+        <div class="absolute top-4 left-1/2 -translate-x-1/2 text-slate-600 font-black text-xs tracking-widest font-brand">G-SHOCK</div>
+        <div class="absolute bottom-4 left-1/2 -translate-x-1/2 text-slate-500 font-bold text-[10px] tracking-widest font-brand">CASIO</div>
+        
+        <!-- Tactical Screws -->
+        <div class="absolute top-6 left-12 text-slate-600 text-xs"><i class="fa-solid fa-plus-minus rotate-45"></i></div>
+        <div class="absolute top-6 right-12 text-slate-600 text-xs"><i class="fa-solid fa-plus-minus -rotate-12"></i></div>
+        <div class="absolute bottom-6 left-12 text-slate-600 text-xs"><i class="fa-solid fa-plus-minus rotate-90"></i></div>
+        <div class="absolute bottom-6 right-12 text-slate-600 text-xs"><i class="fa-solid fa-plus-minus rotate-180"></i></div>
+
+        <!-- Button Labels on Bezel -->
+        <div class="absolute -left-2 top-24 text-[9px] font-bold text-slate-400 uppercase tracking-tighter bg-slate-900 px-1 py-0.5 rounded border border-slate-700">ADJUST</div>
+        <div class="absolute -left-2 bottom-24 text-[9px] font-bold text-slate-400 uppercase tracking-tighter bg-slate-900 px-1 py-0.5 rounded border border-slate-700">MODE</div>
+        <div class="absolute -right-2 top-24 text-[9px] font-bold text-slate-400 uppercase tracking-tighter bg-slate-900 px-1 py-0.5 rounded border border-slate-700">LIGHT</div>
+        <div class="absolute -right-2 bottom-24 text-[9px] font-bold text-amber-500 uppercase tracking-tighter bg-slate-900 px-1 py-0.5 rounded border border-slate-700">START</div>
+
+        <!-- Interactive Watch Hardware Buttons -->
+        <button onclick="handleAdjust()" title="Adjust (24h Toggle)" class="absolute -left-5 top-28 w-4 h-12 bg-gradient-to-r from-slate-600 to-slate-800 rounded-l border-l border-y border-slate-500 active:translate-x-1 transition-transform cursor-pointer"></button>
+        <button onclick="handleMode()" title="Mode Switch" class="absolute -left-5 bottom-28 w-4 h-12 bg-gradient-to-r from-slate-600 to-slate-800 rounded-l border-l border-y border-slate-500 active:translate-x-1 transition-transform cursor-pointer"></button>
+        <button onclick="handleLight()" title="Illuminator Light" class="absolute -right-5 top-28 w-4 h-12 bg-gradient-to-l from-slate-600 to-slate-800 rounded-r border-r border-y border-slate-500 active:-translate-x-1 transition-transform cursor-pointer"></button>
+        <button onclick="handleStartStop()" title="Start / Stop" class="absolute -right-5 bottom-28 w-4 h-12 bg-gradient-to-l from-slate-600 to-slate-800 rounded-r border-r border-y border-slate-500 active:-translate-x-1 transition-transform cursor-pointer"></button>
+
+        <!-- Inner Dial Glass / Canvas Area -->
+        <div class="relative w-full h-full rounded-full dial-inner border-2 border-slate-800 overflow-hidden flex flex-col items-center justify-between p-4">
+          
+          <!-- Background Mechanical Skeleton Canvas Layer -->
+          <canvas id="mechanicalCanvas" class="absolute inset-0 w-full h-full z-0 opacity-80 pointer-events-none"></canvas>
+
+          <!-- Dial Branding & Indicators Overlay -->
+          <div class="relative z-10 w-full flex justify-between items-start pt-2 px-4">
+            <div class="text-left">
+              <span class="text-[10px] font-extrabold text-red-500 tracking-wider block font-brand">PROTECTION</span>
+              <span class="text-[8px] text-slate-400 font-mono">WR 20BAR</span>
+            </div>
+            <div class="text-right">
+              <span class="text-[9px] text-amber-400 font-bold tracking-widest block font-brand">TOUGH AUTO</span>
+              <span class="text-[8px] text-slate-400 font-mono">RUBY JEWELS</span>
+            </div>
+          </div>
+
+          <!-- Analog Watch Overlay Layer (Hands overlay mechanical canvas) -->
+          <div class="absolute inset-0 z-10 pointer-events-none">
+            <!-- Hour Hand -->
+            <div id="hourHand" class="absolute top-1/2 left-1/2 w-1.5 sm:w-2 h-16 sm:h-24 bg-slate-200 border border-slate-900 rounded-full -translate-x-1/2 -translate-y-full origin-bottom transition-transform duration-500 shadow-md">
+              <div class="w-full h-4 bg-red-600 rounded-t-full"></div>
+            </div>
+            <!-- Minute Hand -->
+            <div id="minuteHand" class="absolute top-1/2 left-1/2 w-1 sm:w-1.5 h-24 sm:h-32 bg-slate-100 border border-slate-900 rounded-full -translate-x-1/2 -translate-y-full origin-bottom transition-transform duration-300 shadow-lg">
+              <div class="w-full h-6 bg-amber-400 rounded-t-full"></div>
+            </div>
+            <!-- Center Cap -->
+            <div class="absolute top-1/2 left-1/2 w-3.5 h-3.5 bg-slate-900 border-2 border-red-500 rounded-full -translate-x-1/2 -translate-y-1/2 shadow-lg z-20"></div>
+          </div>
+
+          <!-- LCD Multi-Function Display Block (G-Shock Center Window) -->
+          <div class="relative z-20 w-11/12 max-w-[260px] my-auto">
+            <div id="lcdDisplay" class="lcd-screen rounded-lg border-2 border-slate-900 p-2 text-center flex flex-col justify-between shadow-inner">
+              
+              <!-- Top Row Indicators -->
+              <div class="flex justify-between items-center text-[10px] font-lcd border-b border-black/20 pb-0.5">
+                <span id="modeLabel" class="font-bold text-red-900 uppercase">TIME</span>
+                <span id="dayLabel" class="lcd-digit font-bold">MON</span>
+                <span id="dateLabel" class="lcd-digit">10-27</span>
+                <span id="formatLabel" class="lcd-digit font-bold">24H</span>
+              </div>
+
+              <!-- Main Numeric Display -->
+              <div class="py-1 flex justify-center items-baseline gap-1">
+                <span id="mainDisplay" class="lcd-digit font-lcd text-2xl sm:text-3xl font-extrabold tracking-widest">
+                  12:45:00
+                </span>
+                <span id="subDisplay" class="lcd-digit font-lcd text-xs font-bold text-slate-800">
+                  PM
+                </span>
+              </div>
+
+              <!-- Bottom Row Status -->
+              <div class="flex justify-between items-center text-[8px] font-lcd border-t border-black/20 pt-0.5">
+                <span class="lcd-digit"><i class="fa-solid fa-bolt"></i> SOLAR</span>
+                <span id="statusIndicator" class="lcd-digit uppercase font-bold text-amber-900">RUNNING</span>
+                <span class="lcd-digit">CHIME <i class="fa-solid fa-volume-high"></i></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom Dial Sub-Text -->
+          <div class="relative z-10 pb-2 text-center">
+            <div class="text-[8px] text-slate-400 tracking-widest font-mono">AUTOMATIC SKELETON MOVEMENT</div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- External Control Bar for Easy Web Interaction -->
+      <div class="mt-8 bg-slate-900 border border-slate-800 p-4 rounded-xl flex flex-wrap justify-center gap-3 max-w-lg w-full shadow-lg">
+        <button onclick="handleMode()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 active:scale-95 text-xs font-mono font-bold rounded-lg border border-slate-700 flex items-center gap-1.5 transition">
+          <i class="fa-solid fa-rotate text-red-500"></i> MODE
+        </button>
+        <button onclick="handleAdjust()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 active:scale-95 text-xs font-mono font-bold rounded-lg border border-slate-700 flex items-center gap-1.5 transition">
+          <i class="fa-solid fa-sliders text-blue-400"></i> ADJUST / 24H
+        </button>
+        <button onclick="handleStartStop()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 active:scale-95 text-xs font-mono font-bold rounded-lg border border-slate-700 flex items-center gap-1.5 transition">
+          <i class="fa-solid fa-play-pause text-amber-400"></i> START/STOP
+        </button>
+        <button onclick="handleLight()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 active:scale-95 text-xs font-mono font-bold rounded-lg border border-slate-700 flex items-center gap-1.5 transition">
+          <i class="fa-solid fa-lightbulb text-teal-400"></i> ILLUMINATOR
+        </button>
+      </div>
+    </div>
+
+
+    <!-- VIEW 2: OPENSHIFT DEPLOYMENT GUIDES & CONFIG FILES -->
+    <div id="view-openshift" class="w-full max-w-5xl hidden">
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-6 shadow-xl space-y-6">
+        
+        <div>
+          <h2 class="text-xl font-bold text-white flex items-center gap-2">
+            <i class="fa-solid fa-cubes text-red-500"></i> Red Hat OpenShift Deployment Artifacts
+          </h2>
+          <p class="text-sm text-slate-400 mt-1">
+            Below are all the standard production configuration files needed to deploy this web application on Red Hat OpenShift using standard Nginx container image or OpenShift Source-to-Image (S2I).
+          </p>
+        </div>
+
+        <!-- Tabbed Config File View -->
+        <div class="space-y-4">
+          <div class="flex flex-wrap border-b border-slate-800 gap-2">
+            <button onclick="showConfig('dockerfile')" id="cfg-btn-dockerfile" class="cfg-tab-btn text-xs font-mono px-3 py-2 rounded-t-lg bg-slate-800 text-white font-bold border-t border-x border-slate-700">Dockerfile</button>
+            <button onclick="showConfig('nginx')" id="cfg-btn-nginx" class="cfg-tab-btn text-xs font-mono px-3 py-2 rounded-t-lg bg-slate-950 text-slate-400 border-t border-x border-transparent hover:text-white">nginx.conf</button>
+            <button onclick="showConfig('deployment')" id="cfg-btn-deployment" class="cfg-tab-btn text-xs font-mono px-3 py-2 rounded-t-lg bg-slate-950 text-slate-400 border-t border-x border-transparent hover:text-white">deployment.yaml</button>
+            <button onclick="showConfig('service')" id="cfg-btn-service" class="cfg-tab-btn text-xs font-mono px-3 py-2 rounded-t-lg bg-slate-950 text-slate-400 border-t border-x border-transparent hover:text-white">service.yaml</button>
+            <button onclick="showConfig('route')" id="cfg-btn-route" class="cfg-tab-btn text-xs font-mono px-3 py-2 rounded-t-lg bg-slate-950 text-slate-400 border-t border-x border-transparent hover:text-white">route.yaml</button>
+            <button onclick="showConfig('instructions')" id="cfg-btn-instructions" class="cfg-tab-btn text-xs font-mono px-3 py-2 rounded-t-lg bg-slate-950 text-slate-400 border-t border-x border-transparent hover:text-white">CLI Guide</button>
+          </div>
+
+          <!-- Code Containers -->
+          <div id="cfg-dockerfile" class="cfg-content">
+            <div class="flex justify-between items-center mb-2">
+              <span class="text-xs text-slate-400 font-mono">Containerfile / Dockerfile (Root level)</span>
+              <button onclick="copyCode('code-dockerfile')" class="text-xs text-slate-400 hover:text-white bg-slate-800 px-2 py-1 rounded border border-slate-700"><i class="fa-regular fa-copy"></i> Copy</button>
+            </div>
+            <pre><code id="code-dockerfile"># Use official unprivileged Nginx image for OpenShift security compliance
+FROM nginxinc/nginx-unprivileged:alpine
+
+# Copy web app assets to Nginx html directory
+COPY index.html /usr/share/nginx/html/index.html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# Expose non-root HTTP port (8080) required by OpenShift SCC
+EXPOSE 8080
+
+CMD ["nginx", "-g", "daemon off;"]</code></pre>
+          </div>
+
+          <div id="cfg-nginx" class="cfg-content hidden">
+            <div class="flex justify-between items-center mb-2">
+              <span class="text-xs text-slate-400 font-mono">nginx.conf</span>
+              <button onclick="copyCode('code-nginx')" class="text-xs text-slate-400 hover:text-white bg-slate-800 px-2 py-1 rounded border border-slate-700"><i class="fa-regular fa-copy"></i> Copy</button>
+            </div>
+            <pre><code id="code-nginx">server {
+    listen 8080;
+    server_name localhost;
+
+    location / {
+        root /usr/share/nginx/html;
+        index index.html index.htm;
+        try_files $uri $uri/ /index.html;
+    }
+
+    # Enable Gzip Compression
+    gzip on;
+    gzip_types text/plain text/css application/json application/javascript text/xml application/xml;
+
+    error_page 500 502 503 504 /50x.html;
+    location = /50x.html {
+        root /usr/share/nginx/html;
+    }
+}</code></pre>
+          </div>
+
+          <div id="cfg-deployment" class="cfg-content hidden">
+            <div class="flex justify-between items-center mb-2">
+              <span class="text-xs text-slate-400 font-mono">k8s/deployment.yaml</span>
+              <button onclick="copyCode('code-deployment')" class="text-xs text-slate-400 hover:text-white bg-slate-800 px-2 py-1 rounded border border-slate-700"><i class="fa-regular fa-copy"></i> Copy</button>
+            </div>
+            <pre><code id="code-deployment">apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gshock-hybrid-watch
+  labels:
+    app: gshock-hybrid-watch
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: gshock-hybrid-watch
+  template:
+    metadata:
+      labels:
+        app: gshock-hybrid-watch
+    spec:
+      containers:
+      - name: watch-app
+        image: image-registry.openshift-image-registry.svc:5000/my-namespace/gshock-hybrid-watch:latest
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+        resources:
+          limits:
+            cpu: 200m
+            memory: 256Mi
+          requests:
+            cpu: 50m
+            memory: 64Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: false
+          runAsNonRoot: true</code></pre>
+          </div>
+
+          <div id="cfg-service" class="cfg-content hidden">
+            <div class="flex justify-between items-center mb-2">
+              <span class="text-xs text-slate-400 font-mono">k8s/service.yaml</span>
+              <button onclick="copyCode('code-service')" class="text-xs text-slate-400 hover:text-white bg-slate-800 px-2 py-1 rounded border border-slate-700"><i class="fa-regular fa-copy"></i> Copy</button>
+            </div>
+            <pre><code id="code-service">apiVersion: v1
+kind: Service
+metadata:
+  name: gshock-hybrid-service
+  labels:
+    app: gshock-hybrid-watch
+spec:
+  ports:
+  - port: 8080
+    targetPort: 8080
+    name: http
+    protocol: TCP
+  selector:
+    app: gshock-hybrid-watch
+  type: ClusterIP</code></pre>
+          </div>
+
+          <div id="cfg-route" class="cfg-content hidden">
+            <div class="flex justify-between items-center mb-2">
+              <span class="text-xs text-slate-400 font-mono">k8s/route.yaml (OpenShift Route)</span>
+              <button onclick="copyCode('code-route')" class="text-xs text-slate-400 hover:text-white bg-slate-800 px-2 py-1 rounded border border-slate-700"><i class="fa-regular fa-copy"></i> Copy</button>
+            </div>
+            <pre><code id="code-route">apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: gshock-hybrid-route
+  labels:
+    app: gshock-hybrid-watch
+spec:
+  to:
+    kind: Service
+    name: gshock-hybrid-service
+  port:
+    targetPort: 8080
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect</code></pre>
+          </div>
+
+          <div id="cfg-instructions" class="cfg-content hidden">
+            <div class="flex justify-between items-center mb-2">
+              <span class="text-xs text-slate-400 font-mono">OpenShift Deployment Commands (`oc` CLI)</span>
+              <button onclick="copyCode('code-instructions')" class="text-xs text-slate-400 hover:text-white bg-slate-800 px-2 py-1 rounded border border-slate-700"><i class="fa-regular fa-copy"></i> Copy</button>
+            </div>
+            <pre><code id="code-instructions"># 1. Login to OpenShift Cluster
+oc login --token=<YOUR-TOKEN> --server=https://api.your-openshift-cluster.com:6443
+
+# 2. Create or select project namespace
+oc new-project gshock-watch-app || oc project gshock-watch-app
+
+# 3. OPTION A: Quick Deployment directly from GitHub (S2I / Docker build)
+oc new-app https://github.com/<your-username>/gshock-watch-app.git \
+  --name=gshock-hybrid-watch \
+  --strategy=docker
+
+# Expose public HTTPS route
+oc create route edge --service=gshock-hybrid-watch
+
+# 4. OPTION B: Manual Manifest Apply
+oc apply -f k8s/deployment.yaml
+oc apply -f k8s/service.yaml
+oc apply -f k8s/route.yaml
+
+# Check app status
+oc get pods -w
+oc get route gshock-hybrid-route</code></pre>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-800 bg-slate-900/50 py-3 text-center text-xs text-slate-500">
+    G-SHOCK Hybrid Skeleton Web App &bull; Designed for Red Hat OpenShift Container Platform
+  </footer>
+
+  <!-- JAVASCRIPT ENGINE -->
+  <script>
+    // --- APP STATE ---
+    let currentMode = 'TIME'; // TIME, STOPWATCH, TIMER
+    let is24Hour = true;
+    let isIlluminated = false;
+    let stopwatchRunning = false;
+    let stopwatchTime = 0; // In ms
+    let stopwatchInterval = null;
+
+    let timerDuration = 60; // 60 seconds default
+    let timerTime = 60;
+    let timerRunning = false;
+    let timerInterval = null;
+
+    // --- CANVAS SKELETON MECHANICAL MOVEMENT ---
+    const canvas = document.getElementById('mechanicalCanvas');
+    const ctx = canvas.getContext('2d');
+
+    function resizeCanvas() {
+      const container = canvas.parentElement;
+      canvas.width = container.clientWidth;
+      canvas.height = container.clientHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    let rotationAngle = 0;
+
+    function drawGear(cx, cy, outerRadius, innerRadius, teeth, angle, color) {
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(angle);
+      ctx.beginPath();
+      ctx.fillStyle = color;
+      ctx.strokeStyle = '#050505';
+      ctx.lineWidth = 1.5;
+
+      const numPoints = teeth * 2;
+      const step = (Math.PI * 2) / numPoints;
+
+      for (let i = 0; i < numPoints; i++) {
+        const radius = (i % 2 === 0) ? outerRadius : innerRadius;
+        const x = Math.cos(i * step) * radius;
+        const y = Math.sin(i * step) * radius;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Gear Inner cutouts
+      ctx.beginPath();
+      ctx.arc(0, 0, innerRadius * 0.4, 0, Math.PI * 2);
+      ctx.fillStyle = '#111317';
+      ctx.fill();
+      ctx.stroke();
+
+      // Spokes
+      for (let i = 0; i < 4; i++) {
+        ctx.rotate(Math.PI / 2);
+        ctx.beginPath();
+        ctx.rect(-2, 0, 4, innerRadius * 0.8);
+        ctx.fillStyle = '#050505';
+        ctx.fill();
+      }
+
+      ctx.restore();
+    }
+
+    function drawBalanceWheel(cx, cy, radius, angle) {
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(angle);
+
+      // Outer rim
+      ctx.beginPath();
+      ctx.arc(0, 0, radius, 0, Math.PI * 2);
+      ctx.lineWidth = 4;
+      ctx.strokeStyle = '#d99b26'; // Gold/Brass color
+      ctx.stroke();
+
+      // Balance Screws on Rim
+      for (let i = 0; i < 8; i++) {
+        const a = (i * Math.PI) / 4;
+        const sx = Math.cos(a) * radius;
+        const sy = Math.sin(a) * radius;
+        ctx.beginPath();
+        ctx.arc(sx, sy, 2, 0, Math.PI * 2);
+        ctx.fillStyle = '#ffffff';
+        ctx.fill();
+      }
+
+      // Hairspring
+      ctx.beginPath();
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = '#88aaff';
+      for (let i = 0; i < 100; i++) {
+        const a = i * 0.15;
+        const r = (i / 100) * (radius * 0.6);
+        const x = Math.cos(a) * r;
+        const y = Math.sin(a) * r;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+
+      ctx.restore();
+    }
+
+    function animateSkeleton() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      const cx = canvas.width / 2;
+      const cy = canvas.height / 2;
+
+      rotationAngle += 0.015;
+
+      // 1. Mainspring Drum (Top Left)
+      drawGear(cx - 65, cy - 65, 55, 48, 24, rotationAngle * 0.2, '#3a3d45');
+
+      // 2. Center Wheel (Middle Drives Hands)
+      drawGear(cx, cy, 45, 38, 20, -rotationAngle * 0.5, '#8a6d29');
+
+      // 3. Third Wheel (Bottom Right)
+      drawGear(cx + 60, cy + 45, 40, 32, 16, rotationAngle * 1.2, '#5e636e');
+
+      // 4. Escapement Wheel (Bottom Left fast spin)
+      drawGear(cx - 55, cy + 60, 28, 22, 12, -rotationAngle * 3.5, '#b53c2a');
+
+      // 5. Rapid Oscillating Balance Wheel
+      const balanceOscillation = Math.sin(Date.now() * 0.02) * 1.2;
+      drawBalanceWheel(cx + 50, cy - 60, 35, balanceOscillation);
+
+      // Jewel Bearings (Red Rubies)
+      const jewels = [
+        [cx - 65, cy - 65],
+        [cx, cy],
+        [cx + 60, cy + 45],
+        [cx - 55, cy + 60],
+        [cx + 50, cy - 60]
+      ];
+
+      jewels.forEach(([jx, jy]) => {
+        ctx.beginPath();
+        ctx.arc(jx, jy, 4, 0, Math.PI * 2);
+        ctx.fillStyle = '#e6005c'; // Ruby Red
+        ctx.fill();
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 0.8;
+        ctx.stroke();
+      });
+
+      requestAnimationFrame(animateSkeleton);
+    }
+
+    // --- TIME & LCD DISPLAY UPDATER ---
+    function updateClock() {
+      const now = new Date();
+
+      // Analog Hands Calculation
+      const hours = now.getHours();
+      const minutes = now.getMinutes();
+      const seconds = now.getSeconds();
+      const ms = now.getMilliseconds();
+
+      const hourDeg = ((hours % 12) + minutes / 60) * 30;
+      const minDeg = (minutes + seconds / 60) * 6;
+
+      document.getElementById('hourHand').style.transform = `translate(-50%, -100%) rotate(${hourDeg}deg)`;
+      document.getElementById('minuteHand').style.transform = `translate(-50%, -100%) rotate(${minDeg}deg)`;
+
+      // Date Information
+      const days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+      document.getElementById('dayLabel').textContent = days[now.getDay()];
+      document.getElementById('dateLabel').textContent = `${now.getMonth() + 1}-${now.getDate()}`;
+
+      // Mode Specific LCD Render
+      if (currentMode === 'TIME') {
+        document.getElementById('modeLabel').textContent = 'TIME';
+        document.getElementById('formatLabel').textContent = is24Hour ? '24H' : '12H';
+
+        let displayHours = hours;
+        let ampm = '';
+
+        if (!is24Hour) {
+          ampm = hours >= 12 ? 'PM' : 'AM';
+          displayHours = hours % 12 || 12;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            user-select: none;
-        }
+        const hStr = String(displayHours).padStart(2, '0');
+        const mStr = String(minutes).padStart(2, '0');
+        const sStr = String(seconds).padStart(2, '0');
 
-        body {
-            background-color: var(--bg-color);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-family: 'Segoe UI', Roboto, -apple-system, sans-serif;
-            color: #fff;
-            overflow: hidden;
-        }
+        document.getElementById('mainDisplay').textContent = `${hStr}:${mStr}:${sStr}`;
+        document.getElementById('subDisplay').textContent = ampm;
+        document.getElementById('statusIndicator').textContent = 'RUNNING';
+      }
+    }
 
-        .watch-container {
-            position: relative;
-            width: 440px;
-            height: 440px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+    // --- BUTTON CONTROLLERS ---
+    function handleMode() {
+      if (currentMode === 'TIME') {
+        currentMode = 'STOPWATCH';
+        document.getElementById('modeLabel').textContent = 'STW';
+        renderStopwatch();
+      } else if (currentMode === 'STOPWATCH') {
+        currentMode = 'TIMER';
+        document.getElementById('modeLabel').textContent = 'TMR';
+        renderTimer();
+      } else {
+        currentMode = 'TIME';
+        updateClock();
+      }
+    }
 
-        /* G-SHOCK Outer Bezel (Octagonal / Rough Hex Shape) */
-        .outer-bezel {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle, #2a2e39 0%, #15171e 100%);
-            border-radius: 42%;
-            box-shadow: 
-                0 20px 50px rgba(0,0,0,0.8),
-                inset 0 4px 6px rgba(255,255,255,0.1),
-                inset 0 -6px 10px rgba(0,0,0,0.9);
-            border: 4px solid #363b47;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+    function handleAdjust() {
+      if (currentMode === 'TIME') {
+        is24Hour = !is24Hour;
+        updateClock();
+      } else if (currentMode === 'STOPWATCH') {
+        // Reset Stopwatch
+        stopwatchRunning = false;
+        clearInterval(stopwatchInterval);
+        stopwatchTime = 0;
+        renderStopwatch();
+      } else if (currentMode === 'TIMER') {
+        // Reset Timer
+        timerRunning = false;
+        clearInterval(timerInterval);
+        timerTime = timerDuration;
+        renderTimer();
+      }
+    }
 
-        .bezel-screws {
-            position: absolute;
-            width: 90%;
-            height: 90%;
-            pointer-events: none;
+    function handleStartStop() {
+      if (currentMode === 'STOPWATCH') {
+        stopwatchRunning = !stopwatchRunning;
+        if (stopwatchRunning) {
+          const startTime = Date.now() - stopwatchTime;
+          stopwatchInterval = setInterval(() => {
+            stopwatchTime = Date.now() - startTime;
+            renderStopwatch();
+          }, 10);
+        } else {
+          clearInterval(stopwatchInterval);
         }
-
-        .screw {
-            position: absolute;
-            width: 12px;
-            height: 12px;
-            background: linear-gradient(135deg, #777, #222);
-            border-radius: 50%;
-            border: 1px solid #444;
+      } else if (currentMode === 'TIMER') {
+        timerRunning = !timerRunning;
+        if (timerRunning) {
+          timerInterval = setInterval(() => {
+            if (timerTime > 0) {
+              timerTime--;
+              renderTimer();
+            } else {
+              timerRunning = false;
+              clearInterval(timerInterval);
+              alert('G-SHOCK ALARM: TIMER FINISHED!');
+            }
+          }, 1000);
+        } else {
+          clearInterval(timerInterval);
         }
+      }
+    }
 
-        .screw::after {
-            content: '';
-            position: absolute;
-            top: 5px;
-            left: 2px;
-            width: 8px;
-            height: 2px;
-            background: #111;
-        }
+    function handleLight() {
+      isIlluminated = !isIlluminated;
+      const lcd = document.getElementById('lcdDisplay');
+      if (isIlluminated) {
+        lcd.classList.add('illuminated');
+        // Auto off after 3 seconds like real Casio light
+        setTimeout(() => {
+          lcd.classList.remove('illuminated');
+          isIlluminated = false;
+        }, 3000);
+      } else {
+        lcd.classList.remove('illuminated');
+      }
+    }
 
-        .screw.top-left { top: 12%; left: 12%; transform: rotate(25deg); }
+    function renderStopwatch() {
+      const mins = Math.floor(stopwatchTime / 60000);
+      const secs = Math.floor((stopwatchTime % 60000) / 1000);
+      const ms = Math.floor((stopwatchTime % 1000) / 10);
+
+      const mStr = String(mins).padStart(2, '0');
+      const sStr = String(secs).padStart(2, '0');
+      const msStr = String(ms).padStart(2, '0');
+
+      document.getElementById('mainDisplay').textContent = `${mStr}:${sStr}`;
+      document.getElementById('subDisplay').textContent = msStr;
+      document.getElementById('statusIndicator').textContent = stopwatchRunning ? 'COUNTING' : 'STOPPED';
+      document.getElementById('formatLabel').textContent = 'STW';
+    }
+
+    function renderTimer() {
+      const mins = Math.floor(timerTime / 60);
+      const secs = timerTime % 60;
+
+      const mStr = String(mins).padStart(2, '0');
+      const sStr = String(secs).padStart(2, '0');
+
+      document.getElementById('mainDisplay').textContent = `${mStr}:${sStr}`;
+      document.getElementById('subDisplay').textContent = 'SEC';
+      document.getElementById('statusIndicator').textContent = timerRunning ? 'TMR DOWN' : 'PAUSED';
+      document.getElementById('formatLabel').textContent = 'TMR';
+    }
+
+    // --- NAVIGATION SWITCHER ---
+    function switchTab(tab) {
+      const watchView = document.getElementById('view-watch');
+      const openshiftView = document.getElementById('view-openshift');
+      const watchBtn = document.getElementById('tab-watch');
+      const openshiftBtn = document.getElementById('tab-openshift');
+
+      if (tab === 'watch') {
+        watchView.classList.remove('hidden');
+        openshiftView.classList.add('hidden');
+        watchBtn.classList.add('active');
+        openshiftBtn.classList.remove('active');
+      } else {
+        watchView.classList.add('hidden');
+        openshiftView.classList.remove('hidden');
+        watchBtn.classList.remove('active');
+        openshiftBtn.classList.add('active');
+      }
+    }
+
+    function showConfig(cfgKey) {
+      document.querySelectorAll('.cfg-content').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.cfg-tab-btn').forEach(btn => {
+        btn.classList.remove('bg-slate-800', 'text-white', 'font-bold', 'border-slate-700');
+        btn.classList.add('bg-slate-950', 'text-slate-400', 'border-transparent');
+      });
+
+      document.getElementById(`cfg-${cfgKey}`).classList.remove('hidden');
+      const targetBtn = document.getElementById(`cfg-btn-${cfgKey}`);
+      targetBtn.classList.add('bg-slate-800', 'text-white', 'font-bold', 'border-slate-700');
+      targetBtn.classList.remove('bg-slate-950', 'text-slate-400', 'border-transparent');
+    }
+
+    function copyCode(elementId) {
+      const codeText = document.getElementById(elementId).innerText;
+      const textArea = document.createElement('textarea');
+      textArea.value = codeText;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+      
+      // Temporary user notification
+      const btn = event.currentTarget;
+      const originalText = btn.innerHTML;
+      btn.innerHTML = '<i class="fa-solid fa-check text-green-400"></i> Copied!';
+      setTimeout(() => btn.innerHTML = originalText, 1500);
+    }
+
+    // --- INIT ---
+    window.onload = function() {
+      animateSkeleton();
+      setInterval(updateClock, 1000);
+      updateClock();
+    };
+  </script>
+</body>
+</html>
